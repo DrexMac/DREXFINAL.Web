@@ -1,0 +1,171 @@
+﻿@page
+@model DREXFINAL.Web.Pages.MoviesAndDirector.IndexModel
+
+@{
+    ViewData["Title"] = "Manage Movies and Directors";
+}
+
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Manage Movies and Directors</h1>
+    <p class="lead text-center">Easily manage and sort movie and director information.</p>
+
+    <div class="input-group mb-3">
+        <a href="~/moviesanddirector/create" class="btn btn-primary">Create Movie</a>
+    </div>
+
+    <div class="input-group mb-3">
+        <label class="input-group-text" for="searchBy">Search By</label>
+        <select class="form-select" id="searchBy" name="SearchBy">
+            <option value="" selected>Choose...</option>
+            <option value="Title">Title</option>
+            <option value="Director">Director</option>
+            <option value="Genre">Genre</option>
+        </select>
+
+        <input type="text" id="keyword" class="form-control" name="Keyword" placeholder="Search...">
+        <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="search()">Search</button>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">
+                    Title
+                    <div class="btn-group" role="group">
+                        <a href="~/moviesanddirector/index?sortBy=Title&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                        <a href="~/moviesanddirector/index?sortBy=Title&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    </div>
+                </th>
+                <th scope="col">
+                    Director
+                    <div class="btn-group" role="group">
+                        <a href="~/moviesanddirector/index?sortBy=Director&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                        <a href="~/moviesanddirector/index?sortBy=Director&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    </div>
+                </th>
+                <th scope="col">
+                    Genre
+                    <div class="btn-group" role="group">
+                        <a href="~/moviesanddirector/index?sortBy=Genre&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                        <a href="~/moviesanddirector/index?sortBy=Genre&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    </div>
+                </th>
+                <th scope="col" colspan="3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movie in Model.Movies)
+            {
+                <tr>
+                    <td>@movie.Title</td>
+                    <td>@movie.Director?.Name</td>
+                    <td>@movie.Genre</td>
+                    <td>
+                        <a href="~/moviesanddirector/update?id=@movie.Id" type="button" class="btn btn-secondary">Edit</a>
+                    </td>
+                    <td>
+                        @if (movie.IsDeleted == true)
+                        {
+                            <a href="#" type="button" class="btn btn-primary" onclick="confirmUndelete('@movie.Id','@movie.Title')">Undelete</a>
+                        }
+                        else
+                        {
+                            <a href="#" type="button" class="btn btn-warning" onclick="confirmSoftDelete('@movie.Id','@movie.Title')">Soft Delete</a>
+                        }
+                    </td>
+                    <td>
+                        <a href="#" type="button" class="btn btn-danger" onclick="confirmHardDelete('@movie.Id','@movie.Title')">Hard Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+        </ul>
+    </nav>
+</div>
+
+<div class="modal fade" id="hardDeleteModal" tabindex="-1" aria-labelledby="hardDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hardDeleteModalLabel">Hard delete this Movie?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to hard delete this movie?
+                <p id="hardDeleteTitle"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <a id="hardDeleteLink" href="#" type="button" class="btn btn-danger">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="softDeleteModal" tabindex="-1" aria-labelledby="softDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="softDeleteModalLabel">Soft delete this Movie?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to soft delete this movie?
+                <p id="softDeleteTitle"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <a id="softDeleteLink" href="#" type="button" class="btn btn-warning">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="unDeleteModal" tabindex="-1" aria-labelledby="unDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unDeleteModalLabel">Undelete this Movie?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to undelete this movie?
+                <p id="unDeleteTitle"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <a id="unDeleteLink" href="#" type="button" class="btn btn-primary">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function search() {
+            window.location = "../moviesanddirector/index?sortBy=Title&sortAsc=false&searchBy=" + $("#searchBy").val() + "&keyword=" + $("#keyword").val();
+        }
+
+        function confirmHardDelete(id, title) {
+            $("#hardDeleteTitle").html(title);
+            $("#hardDeleteLink").attr("href", "/moviesanddirector/delete?id=" + id);
+            $("#hardDeleteModal").modal('show');
+        }
+
+        function confirmSoftDelete(id, title) {
+            $("#softDeleteTitle").html(title);
+            $("#softDeleteLink").attr("href", "/moviesanddirector/soft-delete?id=" + id);
+            $("#softDeleteModal").modal('show');
+        }
+
+        function confirmUndelete(id, title) {
+            $("#unDeleteTitle").html(title);
+            $("#unDeleteLink").attr("href", "/moviesanddirector/undelete?id=" + id);
+            $("#unDeleteModal").modal('show');
+        }
+    </script>
+}
